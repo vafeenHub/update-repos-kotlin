@@ -1,11 +1,14 @@
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.time.LocalDateTime
+import kotlinx.coroutines.runBlocking
+
 
 fun main() {
     runBlocking {
         val repoMap = mutableMapOf<String, MutableList<GitHubRepo>>()
-        RepoInfoWithReadmeRepository().getInfo()
+        val repository = RepoInfoWithReadmeRepository(Clients.retrofitClient)
+        repository.getInfo()
             .forEach { repo ->
                 if (repo.name != ".github") {
                     println(repo)
@@ -21,13 +24,14 @@ fun main() {
                 }
             }
 
-        repoMap.keys.sortedAsSemesters().forEach { key ->
-            println("\nkey = $key")
-            repoMap[key]?.forEach { repo ->
-                println(repo.getLinkedString())
-            }
-        }
+//        repoMap.keys.sortedAsSemesters().forEach { key ->
+//            println("\nkey = $key")
+//            repoMap[key]?.forEach { repo ->
+//                println(repo.getLinkedString())
+//            }
+//        }
         createReadme(repoMap)
+        repository.closeConnection()
     }
 }
 
@@ -49,13 +53,11 @@ fun Set<String>.sortedAsSemesters(): List<String> = this.sortedWith(
         { it } // Сортировка строк по алфавиту
     ))
 
-fun GitHubRepo.getLinkedString(): String {
-    return "[${
-        readme?.replace("#", "")?.trim()
-    }]($html_url)"
-}
+fun GitHubRepo.getLinkedString(): String = "[${readme?.replaceFirst("#", "")?.trim()}]($html_url)"
+
 
 fun createReadme(repoMap: Map<String, MutableList<GitHubRepo>>) {
+    println("start create")
     val mainContent = getContentFromTemplateReadme()
     val file = File("profile/README.md")
     file.createNewFile()
@@ -75,6 +77,7 @@ fun createReadme(repoMap: Map<String, MutableList<GitHubRepo>>) {
             append("${repo.getLinkedString()}\n")
         }
     }
+    println("end create")
 }
 
 fun getContentFromTemplateReadme(): String = File("README.md").readText()

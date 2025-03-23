@@ -1,20 +1,30 @@
-class RepoInfoWithReadmeRepository {
+import base.Client
+
+class RepoInfoWithReadmeRepository(private val client: Client) {
     suspend fun getInfo(): List<GitHubRepo> {
         val result = mutableListOf<GitHubRepo>()
-        val repos = RetrofitClient.gitHubService.listRepos(page = 1)
+        val repos = client.service.listRepos().also {
+            println("size = ${it.size}")
+        }
         repos.forEachIndexed { index, repo ->
             if (!repo.private) {
                 try {
-                    val decodedReadme = RetrofitClient.gitHubFileService.getRawContent(
+                    val decodedReadme = client.fileService.getRawContent(
                         repo.name, "README.md"
-                    ).substringBefore('\n')
-                    result.add(repos[index].copy(readme = decodedReadme))
-                    println("Repository Name: ${repo.name}, URL: ${repo.html_url}, README: $decodedReadme")
+                    )?.substringBefore('\n')
+                    if (decodedReadme != null) {
+                        result.add(repos[index].copy(readme = decodedReadme))
+                    }
+                    println("Repository Name: ${repo.name}, README: $decodedReadme")
                 } catch (e: Exception) {
-                    println("${repo.name} ${e.message}")
+                    println("Repository Name: ${repo.name}, ERRRRRRRRRORRRRRRRRRRRR")
                 }
             }
         }
         return result
+    }
+
+    fun closeConnection() {
+        client.shutdown()
     }
 }
