@@ -1,11 +1,11 @@
 import kotlinx.coroutines.runBlocking
-import java.io.File
-import java.time.LocalDateTime
+import readme_processor.*
 
 
 fun main() {
     runBlocking {
-        val repoMap = mutableMapOf<String, MutableList<GitHubRepo>>()
+        val repoMap = repoMapOf()
+
         val repository = RepoInfoWithReadmeRepository(Clients.retrofitClient)
         repository.getInfo()
             .forEach { repo ->
@@ -23,21 +23,9 @@ fun main() {
                 }
             }
 
-//        repoMap.keys.sortedAsSemesters().forEach { key ->
-//            println("\nkey = $key")
-//            repoMap[key]?.forEach { repo ->
-//                println(repo.getLinkedString())
-//            }
-//        }
-        createReadme(repoMap)
+        ReadmeProcessor(repoMap, FileRepoMapProcessor).process(getContentFromTemplateReadme())
         repository.closeConnection()
     }
-}
-
-fun MutableMap<String, MutableList<GitHubRepo>>.add(key: String, value: GitHubRepo) {
-    if (this[key] == null)
-        this[key] = mutableListOf<GitHubRepo>()
-    this[key]?.add(value)
 }
 
 fun GitHubRepo.getSemesters(): List<String>? = if (name.contains("semester"))
@@ -45,49 +33,4 @@ fun GitHubRepo.getSemesters(): List<String>? = if (name.contains("semester"))
 else null
 
 
-fun Set<String>.sortedAsSemesters(): List<String> = this.sortedWith(
-    compareBy(
-        { !it.all { char -> char.isDigit() } }, // Сначала строки с цифрами, затем с буквами
-        { it.toIntOrNull() ?: Int.MAX_VALUE }, // Сортировка цифр по значению
-        { it } // Сортировка строк по алфавиту
-    ))
 
-fun GitHubRepo.getLinkedString(): String = "[${readme?.replaceFirst("#", "")?.trim()}]($html_url)"
-
-fun createReadme(repoMap: Map<String, MutableList<GitHubRepo>>) {
-    println("start create")
-    val mainContent = getContentFromTemplateReadme()
-
-    val file = File("profile/README.md")
-    file.createNewFile()
-    fun append(text: String) = file.appendText(text)
-    fun newLine() = append("\n\n")
-    fun clear() = file.writeText("")
-    clear()
-    append(mainContent)
-    readmeContentHandler(repoMap, ::append, ::newLine)
-    println("end create")
-}
-
-fun readmeContentHandler(
-    repoMap: Map<String, MutableList<GitHubRepo>>,
-    append: (String) -> Unit,
-    newLine: () -> Unit
-) {
-    newLine()
-    append("${LocalDateTime.now()}")
-    newLine()
-    append("Repos:")
-    newLine()
-    repoMap.keys.sortedAsSemesters().forEach { key ->
-        append("${if (key != "others") "Semester: " else ""}$key")
-        newLine()
-        repoMap[key]?.forEach { repo ->
-            println(repo)
-            append(repo.getLinkedString())
-            newLine()
-        }
-    }
-}
-
-fun getContentFromTemplateReadme(): String = File("README.md").readText()
