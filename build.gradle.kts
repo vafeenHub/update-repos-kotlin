@@ -1,6 +1,3 @@
-import org.gradle.internal.tools.api.impl.JavaApiMemberWriter.adapter
-import org.gradle.kotlin.dsl.implementation
-
 plugins {
     kotlin("jvm") version "2.1.10"
 }
@@ -16,8 +13,8 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
-    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
+    implementation("com.squareup.retrofit2:converter-scalars:2.11.0")
 }
 
 tasks.test {

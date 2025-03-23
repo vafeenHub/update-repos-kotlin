@@ -1,24 +1,33 @@
-import com.sun.jdi.Value
 import kotlinx.coroutines.runBlocking
+import java.io.File
+import java.time.LocalDateTime
 
-fun main() = runBlocking {
-    val repoMap = mutableMapOf<String, MutableList<GitHubRepo>>()
-    RepoInfoWithReadmeRepository().getInfo().forEach { repo ->
-        repo.getSemesters().let { semesters ->
-            if (semesters == null) {
-                repoMap.add("others", repo)
-            } else {
-                semesters.forEach { semester ->
-                    if (semester.isNotBlank()) repoMap.add(semester, repo)
+fun main() {
+    runBlocking {
+        val repoMap = mutableMapOf<String, MutableList<GitHubRepo>>()
+        RepoInfoWithReadmeRepository().getInfo()
+            .forEach { repo ->
+                if (repo.name != ".github") {
+                    println(repo)
+                    repo.getSemesters().let { semesters ->
+                        if (semesters == null) {
+                            repoMap.add("others", repo)
+                        } else {
+                            semesters.forEach { semester ->
+                                if (semester.isNotBlank()) repoMap.add(semester, repo)
+                            }
+                        }
+                    }
                 }
             }
+
+        repoMap.keys.sortedAsSemesters().forEach { key ->
+            println("\nkey = $key")
+            repoMap[key]?.forEach { repo ->
+                println(repo.getLinkedString())
+            }
         }
-    }
-    repoMap.keys.sortedAsSemesters().forEach { key ->
-        println("\nkey = $key")
-        repoMap[key]?.forEach { repo ->
-            println(repo.getLinkedString())
-        }
+        createReadme(repoMap)
     }
 }
 
@@ -45,3 +54,27 @@ fun GitHubRepo.getLinkedString(): String {
         readme?.replace("#", "")?.trim()
     }]($html_url)"
 }
+
+fun createReadme(repoMap: Map<String, MutableList<GitHubRepo>>) {
+    val mainContent = getContentFromTemplateReadme()
+    val file = File("profile/README.md")
+    file.createNewFile()
+    fun append(text: String) = file.appendText(text)
+
+    file.writeText("")
+    append(mainContent)
+    append("\n")
+    append("${LocalDateTime.now()}")
+    append("\n")
+    append("Repos:\n")
+    repoMap.keys.sortedAsSemesters().forEach { key ->
+        append("\n${if (key != "others") "Semester: " else ""}$key")
+        append("\n")
+        repoMap[key]?.forEach { repo ->
+            println(repo)
+            append("${repo.getLinkedString()}\n")
+        }
+    }
+}
+
+fun getContentFromTemplateReadme(): String = File("README.md").readText()

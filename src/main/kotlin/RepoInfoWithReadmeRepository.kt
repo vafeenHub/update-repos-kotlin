@@ -9,9 +9,9 @@ class RepoInfoWithReadmeRepository {
                         repo.name, "README.md"
                     ).substringBefore('\n')
                     result.add(repos[index].copy(readme = decodedReadme))
-//                    println("Repository Name: ${repo.name}, URL: ${repo.html_url}, README: $decodedReadme")
+                    println("Repository Name: ${repo.name}, URL: ${repo.html_url}, README: $decodedReadme")
                 } catch (e: Exception) {
-//                    println("${repo.name} ${e.message}")
+                    println("${repo.name} ${e.message}")
                 }
             }
         }
