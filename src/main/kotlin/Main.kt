@@ -62,19 +62,22 @@ fun createReadme(repoMap: Map<String, MutableList<GitHubRepo>>) {
     val file = File("profile/README.md")
     file.createNewFile()
     fun append(text: String) = file.appendText(text)
-
+    fun newLine() = append("\n\n")
     file.writeText("")
     append(mainContent)
-    append("\n")
+    newLine()
     append("${LocalDateTime.now()}")
-    append("\n")
-    append("Repos:\n")
+    newLine()
+    append("Repos:")
+    newLine()
     repoMap.keys.sortedAsSemesters().forEach { key ->
-        append("\n${if (key != "others") "Semester: " else ""}$key")
-        append("\n")
+        newLine()
+        append("${if (key != "others") "Semester: " else ""}$key")
+        newLine()
         repoMap[key]?.forEach { repo ->
             println(repo)
-            append("${repo.getLinkedString()}\n")
+            append(repo.getLinkedString())
+            newLine()
         }
     }
     println("end create")
