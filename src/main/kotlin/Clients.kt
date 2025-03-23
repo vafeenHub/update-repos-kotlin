@@ -1,6 +1,6 @@
 import base.Client
 import base.FileService
-import base.Service
+import base.FullPagedService
 import impl.ktor.KtorGitHubFileService
 import impl.ktor.KtorGitHubService
 import impl.retrofit.RetrofitFileService
@@ -11,7 +11,6 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
-import kotlin.jvm.java
 
 object Clients {
     const val BASE_URL_GITHUB_SERVICE = "https://api.github.com/"
@@ -21,7 +20,7 @@ object Clients {
     private val client = HttpClient(CIO) // Простой клиент без ContentNegotiation
     val ktorClient = object : Client {
         override val fileService: FileService = KtorGitHubFileService(client)
-        override val service: Service = KtorGitHubService(client)
+        override val fullPagedService: FullPagedService = FullPagedService(KtorGitHubService(client))
         override fun shutdown() {
             client.close()
         }
@@ -35,11 +34,13 @@ object Clients {
             .client(okHttpClient)
             .addConverterFactory(ScalarsConverterFactory.create())
             .build().create(RetrofitFileService::class.java)
-        override val service: Service = Retrofit.Builder()
-            .baseUrl(BASE_URL_GITHUB_SERVICE)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build().create(RetrofitService::class.java)
+        override val fullPagedService: FullPagedService = FullPagedService(
+            Retrofit.Builder()
+                .baseUrl(BASE_URL_GITHUB_SERVICE)
+                .client(okHttpClient)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build().create(RetrofitService::class.java)
+        )
 
         override fun shutdown() {
             okHttpClient.dispatcher.executorService.shutdown()

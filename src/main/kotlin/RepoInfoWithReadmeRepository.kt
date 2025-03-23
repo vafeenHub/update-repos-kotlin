@@ -3,7 +3,7 @@ import base.Client
 class RepoInfoWithReadmeRepository(private val client: Client) {
     suspend fun getInfo(): List<GitHubRepo> {
         val result = mutableListOf<GitHubRepo>()
-        val repos = client.service.listRepos().also {
+        val repos = client.fullPagedService.fullListRepos().also {
             println("size = ${it.size}")
         }
         repos.forEachIndexed { index, repo ->
@@ -16,7 +16,7 @@ class RepoInfoWithReadmeRepository(private val client: Client) {
                         result.add(repos[index].copy(readme = decodedReadme))
                     }
                     println("Repository Name: ${repo.name}, README: $decodedReadme")
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     println("Repository Name: ${repo.name}, ERRRRRRRRRORRRRRRRRRRRR")
                 }
             }

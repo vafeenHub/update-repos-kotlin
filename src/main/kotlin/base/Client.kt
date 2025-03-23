@@ -2,6 +2,6 @@ package base
 
 interface Client {
     val fileService: FileService
-    val service: Service
+    val fullPagedService: FullPagedService
     fun shutdown()
 }

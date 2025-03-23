@@ -1,7 +1,6 @@
 import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.time.LocalDateTime
-import kotlinx.coroutines.runBlocking
 
 
 fun main() {
@@ -42,7 +41,7 @@ fun MutableMap<String, MutableList<GitHubRepo>>.add(key: String, value: GitHubRe
 }
 
 fun GitHubRepo.getSemesters(): List<String>? = if (name.contains("semester"))
-    name.substringAfter("_").substringBefore("semester").split("-")
+    name.substringAfter("_").substringBefore("semester").split("-").filter { it.isNotBlank() }
 else null
 
 
@@ -55,23 +54,32 @@ fun Set<String>.sortedAsSemesters(): List<String> = this.sortedWith(
 
 fun GitHubRepo.getLinkedString(): String = "[${readme?.replaceFirst("#", "")?.trim()}]($html_url)"
 
-
 fun createReadme(repoMap: Map<String, MutableList<GitHubRepo>>) {
     println("start create")
     val mainContent = getContentFromTemplateReadme()
+
     val file = File("profile/README.md")
     file.createNewFile()
     fun append(text: String) = file.appendText(text)
     fun newLine() = append("\n\n")
-    file.writeText("")
+    fun clear() = file.writeText("")
+    clear()
     append(mainContent)
+    readmeContentHandler(repoMap, ::append, ::newLine)
+    println("end create")
+}
+
+fun readmeContentHandler(
+    repoMap: Map<String, MutableList<GitHubRepo>>,
+    append: (String) -> Unit,
+    newLine: () -> Unit
+) {
     newLine()
     append("${LocalDateTime.now()}")
     newLine()
     append("Repos:")
     newLine()
     repoMap.keys.sortedAsSemesters().forEach { key ->
-        newLine()
         append("${if (key != "others") "Semester: " else ""}$key")
         newLine()
         repoMap[key]?.forEach { repo ->
@@ -80,7 +88,6 @@ fun createReadme(repoMap: Map<String, MutableList<GitHubRepo>>) {
             newLine()
         }
     }
-    println("end create")
 }
 
 fun getContentFromTemplateReadme(): String = File("README.md").readText()
