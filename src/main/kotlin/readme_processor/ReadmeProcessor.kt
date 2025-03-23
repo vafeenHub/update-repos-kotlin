@@ -14,7 +14,7 @@ class ReadmeProcessor(private val repoMap: RepoMap, private val repoMapProcessor
             clear()
             append(startOfReadme)
             newLine()
-            append("${LocalDateTime.now()}")
+            append("Last update: ${LocalDateTime.now().getDate()}")
             newLine()
             append("Repos:")
             newLine()
@@ -48,3 +48,21 @@ fun Set<String>.sortedAsSemesters(): List<String> = this.sortedWith(
     ))
 
 fun GitHubRepo.getLinkedString(): String = "[${readme?.replaceFirst("#", "")?.trim()}]($html_url)"
+
+fun LocalDateTime.getDate(): String = this.let {
+    "${
+        it.dayOfMonth.getStrWithNullIfLessThanTen()
+    }.${
+        it.month.value.getStrWithNullIfLessThanTen()
+    }.${
+        it.year
+    } in ${
+        it.hour
+    }:${
+        it.minute.getStrWithNullIfLessThanTen()
+    }:${
+        it.second.getStrWithNullIfLessThanTen()
+    }"
+}
+
+fun Int.getStrWithNullIfLessThanTen(): String = if (this < 10) "0$this" else "$this"
