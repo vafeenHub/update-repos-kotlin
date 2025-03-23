@@ -1,0 +1,37 @@
+name: Create Release on Tag Push
+
+on:
+  push:
+    tags:
+      - 'v*' # Запускать только при пуше тегов, начинающихся на "v"
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Получаем всю историю коммитов, чтобы извлечь сообщение тега
+
+      - name: Get tag message
+        id: get_tag_message
+        run: |
+          # Извлекаем сообщение тега
+          TAG_NAME=${{ github.ref_name }}
+          TAG_MESSAGE=$(git tag -l --format='%(contents)' $TAG_NAME)
+          echo "Tag message: $TAG_MESSAGE"
+          echo "TAG_MESSAGE=$TAG_MESSAGE" >> $GITHUB_ENV
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.ref_name }} # Название тега
+          release_name: ${{ github.ref_name }} # Название релиза (совпадает с тегом)
+          body: ${{ env.TAG_MESSAGE }} # Используем сообщение тега как тело релиза
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Токен для доступа к GitHub API
