@@ -17,9 +17,9 @@ class ReadmeProcessor(private val repoMap: RepoMap, private val repoMapProcessor
             clear()
             append(startOfReadme)
             newLine()
-            append("Last update: ${getCurrentMoscowTimeAsString()}")
+            append("# Last update: ${getCurrentMoscowTimeAsString()}")
             newLine()
-            append("Repos:")
+            append("# Repos:")
             newLine()
             repoMap.keys.sortedAsSemesters().forEach { key ->
                 append("${if (key != "others") "Semester: " else ""}$key")
