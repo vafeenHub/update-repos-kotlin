@@ -3,6 +3,9 @@ package readme_processor
 import GitHubRepo
 import java.io.File
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 typealias RepoMap = MutableMap<String, MutableList<GitHubRepo>>
 
@@ -14,7 +17,7 @@ class ReadmeProcessor(private val repoMap: RepoMap, private val repoMapProcessor
             clear()
             append(startOfReadme)
             newLine()
-            append("Last update: ${LocalDateTime.now().getDate()}")
+            append("Last update: ${getCurrentMoscowTimeAsString()}")
             newLine()
             append("Repos:")
             newLine()
@@ -49,20 +52,11 @@ fun Set<String>.sortedAsSemesters(): List<String> = this.sortedWith(
 
 fun GitHubRepo.getLinkedString(): String = "[${readme?.replaceFirst("#", "")?.trim()}]($html_url)"
 
-fun LocalDateTime.getDate(): String = this.let {
-    "${
-        it.dayOfMonth.getStrWithNullIfLessThanTen()
-    }.${
-        it.month.value.getStrWithNullIfLessThanTen()
-    }.${
-        it.year
-    } in ${
-        it.hour
-    }:${
-        it.minute.getStrWithNullIfLessThanTen()
-    }:${
-        it.second.getStrWithNullIfLessThanTen()
-    }"
-}
+fun getCurrentMoscowTimeAsString(): String {
+    // 1. Получаем текущее время в Москве
+    val moscowTime = ZonedDateTime.now(ZoneId.of("Europe/Moscow"))
 
-fun Int.getStrWithNullIfLessThanTen(): String = if (this < 10) "0$this" else "$this"
+    // 2. Форматируем в строку (день.месяц.год в часы:минуты:секунды)
+    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy 'в' HH:mm:ss 'MSK'")
+    return moscowTime.format(formatter)
+}
