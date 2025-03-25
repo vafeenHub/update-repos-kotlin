@@ -3,8 +3,6 @@ package readme_processor
 import GitHubRepo
 import java.io.File
 import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 typealias RepoMap = MutableMap<String, MutableList<GitHubRepo>>
 
@@ -16,14 +14,15 @@ class ReadmeProcessor(private val repoMap: RepoMap, private val repoMapProcessor
             clear()
             append(startOfReadme)
             newLine()
-            append("# Last update: ${LocalDateTime.now().getDateTimeString()}")
+            append("Last update: ${LocalDateTime.now().getDate()}")
             newLine()
-            append("# Repos:")
+            append("Repos:")
             newLine()
             repoMap.keys.sortedAsSemesters().forEach { key ->
                 append("${if (key != "others") "Semester: " else ""}$key")
                 newLine()
                 repoMap[key]?.forEach { repo ->
+                    println(repo)
                     append(repo.getLinkedString())
                     newLine()
                 }
@@ -50,12 +49,20 @@ fun Set<String>.sortedAsSemesters(): List<String> = this.sortedWith(
 
 fun GitHubRepo.getLinkedString(): String = "[${readme?.replaceFirst("#", "")?.trim()}]($html_url)"
 
-fun LocalDateTime.getDateTimeString(): String {
-    // 1. Привязываем LocalDateTime к часовому поясу Москвы
-    val moscowZone = ZoneId.of("Europe/Moscow")
-    val moscowTime = this.atZone(moscowZone)
-
-    // 2. Форматируем дату и время с ведущими нулями
-    val formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy 'в' HH:mm:ss 'MSK'")
-    return moscowTime.format(formatter)
+fun LocalDateTime.getDate(): String = this.let {
+    "${
+        it.dayOfMonth.getStrWithNullIfLessThanTen()
+    }.${
+        it.month.value.getStrWithNullIfLessThanTen()
+    }.${
+        it.year
+    } in ${
+        it.hour
+    }:${
+        it.minute.getStrWithNullIfLessThanTen()
+    }:${
+        it.second.getStrWithNullIfLessThanTen()
+    }"
 }
+
+fun Int.getStrWithNullIfLessThanTen(): String = if (this < 10) "0$this" else "$this"
