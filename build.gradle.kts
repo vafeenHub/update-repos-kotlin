@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "org.example"
-version = "1.7"
+version = "1.8"
 
 repositories {
     mavenCentral()
