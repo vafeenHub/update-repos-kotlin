@@ -3,4 +3,5 @@ data class GitHubRepo(
     val private: Boolean,
     val html_url: String, // Добавляем URL репозитория для удобства
     val readme: String?,
+    val default_branch: String,
 )

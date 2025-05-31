@@ -10,7 +10,9 @@ class RepoInfoWithReadmeRepository(private val client: Client) {
             if (!repo.private) {
                 try {
                     val decodedReadme = client.fileService.getRawContent(
-                        repo.name, "README.md"
+                        repoName = repo.name,
+                        defaultBranch = repo.default_branch,
+                        fileName = "README.md"
                     )?.substringBefore('\n')
                     if (decodedReadme != null) {
                         result.add(repos[index].copy(readme = decodedReadme))
