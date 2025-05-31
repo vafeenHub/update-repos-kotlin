@@ -16,8 +16,8 @@ class RepoInfoWithReadmeRepository(private val client: Client) {
                         result.add(repos[index].copy(readme = decodedReadme))
                     }
                     println("Repository Name: ${repo.name}, README: $decodedReadme")
-                } catch (_: Exception) {
-                    println("Repository Name: ${repo.name}, ERRRRRRRRRORRRRRRRRRRRR")
+                } catch (e: Exception) {
+                    println("Repository Name: ${repo.name}, ${e.stackTraceToString()}")
                 }
             }
         }
