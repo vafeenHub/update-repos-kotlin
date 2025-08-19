@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "org.example"
-version = "2.0"
+version = "2025.08.19"
 
 repositories {
     mavenCentral()
@@ -25,6 +25,10 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("org.slf4j:slf4j-simple:1.7.36") // Для логирования
     implementation("com.google.code.gson:gson:2.10.1") // Добавляем Gson
+
+    //koin
+    implementation(platform("io.insert-koin:koin-bom:4.0.0"))
+    implementation("io.insert-koin:koin-core")
 }
 
 tasks.test {

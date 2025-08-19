@@ -1,8 +1,12 @@
 import kotlinx.coroutines.runBlocking
+import org.koin.core.context.startKoin
 import readme_processor.*
 
 
 fun main() {
+    startKoin {
+        modules()
+    }
     runBlocking {
         val repoMap = repoMapOf()
 

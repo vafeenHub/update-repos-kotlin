@@ -15,7 +15,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 object Clients {
     const val BASE_URL_GITHUB_SERVICE = "https://api.github.com/"
     const val BASE_URL_GITHUB_FILE_SERVICE = "https://raw.githubusercontent.com/"
-    const val NAME = "vafeenLabs"
+    const val NAME = "vafeenLab"
 
     private val client = HttpClient(CIO) // Простой клиент без ContentNegotiation
     val ktorClient = object : Client {
