@@ -37,7 +37,7 @@ class ReadmeProcessor(private val repoMap: RepoMap, private val repoMapProcessor
 
 fun MutableMap<String, MutableList<GitHubRepo>>.add(key: String, value: GitHubRepo) {
     if (this[key] == null)
-        this[key] = mutableListOf<GitHubRepo>()
+        this[key] = mutableListOf()
     this[key]?.add(value)
 }
 

@@ -1,17 +1,28 @@
+import base.Client
+import impl.retrofit.RetrofitModule
+import impl.retrofit.RetrofitName
 import kotlinx.coroutines.runBlocking
 import org.koin.core.context.startKoin
+import org.koin.core.qualifier.named
+import org.koin.java.KoinJavaComponent.getKoin
 import readme_processor.*
 
 
-fun main() {
+fun main(args: Array<String>) {
+    if (args.isEmpty()) {
+        println("Please provide an account name as a command-line argument.")
+        return
+    }
+    val accountName = args[0]
+
     startKoin {
-        modules()
+        modules(RetrofitModule)
     }
     runBlocking {
         val repoMap = repoMapOf()
 
-        val repository = RepoInfoWithReadmeRepository(Clients.retrofitClient)
-        repository.getInfo()
+        val repository = RepoInfoWithReadmeRepository(getKoin().get<Client>(named(RetrofitName)))
+        repository.getInfo(accountName)
             .forEach { repo ->
                 if (repo.name != ".github") {
                     println(repo)
