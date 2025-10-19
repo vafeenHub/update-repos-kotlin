@@ -55,7 +55,7 @@ jobs:
 
       - name: Build APK with Version
         run: |
-          ./gradlew jar \
+          bash ./gradlew jar \
             -PversionName=${{ steps.generate_tag.outputs.RELEASE_TAG }}
 
       - name: MV jar file to root
