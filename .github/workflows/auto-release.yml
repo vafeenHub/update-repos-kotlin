@@ -1,28 +1,76 @@
-name: Create Release with Tag Message
+name: Create Release
+
 on:
   push:
-    tags:
-      - 'v*' # Запускать workflow при создании тега, начинающегося с 'v'
+    branches:
+      - 3-building-release-on-merge-in-release
+  workflow_dispatch:
 
 jobs:
-  create-release:
+  build-and-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout Repo
+        uses: actions/checkout@v4
 
-      - name: Get tag message
-        id: get_tag_message
+      - name: Generate Release Tag
+        id: generate_tag
         run: |
-          TAG_NAME=${GITHUB_REF#refs/tags/}
-          TAG_MESSAGE=$(git tag -l --format='%(contents)' $TAG_NAME)
-          echo "tag_message=$TAG_MESSAGE" >> $GITHUB_OUTPUT
+          # Получаем текущую дату
+          TODAY=$(TZ=Europe/Moscow date +'%Y.%m.%d')
+          echo "Base tag: $TODAY"
+          
+          # Получаем все существующие теги из текущего репозитория
+          git fetch --tags
+          git tag -l > local_tags.txt
+          
+          # Считаем количество релизов для этой даты
+          EXISTING_TAGS=$(grep -c "^$TODAY" local_tags.txt || true)
+          echo "Existing tags for today: $EXISTING_TAGS"
+          
+          # Считаем общее количество релизов (только с паттерном даты)
+          TOTAL_RELEASES=$(grep -c -E '^[0-9]{4}\.[0-9]{2}\.[0-9]{2}' local_tags.txt || true)
+          echo "Total releases: $TOTAL_RELEASES"
+          
+          if [ $EXISTING_TAGS -eq 0 ]; then
+            RELEASE_TAG="$TODAY"
+          else
+            RELEASE_TAG="${TODAY}-patch${EXISTING_TAGS}"
+          fi
+          
+          echo "Generated tag: $RELEASE_TAG"
+          echo "RELEASE_TAG=$RELEASE_TAG" >> $GITHUB_OUTPUT
+          echo "VERSION_CODE=$((TOTAL_RELEASES + 1))" >> $GITHUB_OUTPUT
 
-      - name: Create Release
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          java-package: 'jdk'
+          cache: 'gradle'
+
+      - name: Build APK with Version
+        run: |
+          ./gradlew jar \
+            -PversionName=${{ steps.generate_tag.outputs.RELEASE_TAG }}
+
+      - name: MV jar file to root
+        run: |
+          mv ./build/libs/Update-repos-${{ steps.generate_tag.outputs.RELEASE_TAG }}.jar ./Update-repos-${{ steps.generate_tag.outputs.RELEASE_TAG }}.jar
+
+      - name: Create Tag
+        uses: rickstaa/action-create-tag@v1.7.2
+        with:
+          tag: ${{ steps.generate_tag.outputs.RELEASE_TAG }}
+
+      - name: Release
         uses: softprops/action-gh-release@v2
         with:
-          body: ${{ steps.get_tag_message.outputs.tag_message }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            ./Update-repos-${{ steps.generate_tag.outputs.RELEASE_TAG }}.jar
+          tag_name: ${{ steps.generate_tag.outputs.RELEASE_TAG }}
+          name: ${{ steps.generate_tag.outputs.RELEASE_TAG }}
