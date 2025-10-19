@@ -3,7 +3,7 @@ plugins {
 }
 
 group = "org.example"
-version = "2025.08.23"
+version = (project.findProperty("versionName") as String?) ?: "1.0.0"
 
 repositories {
     mavenCentral()
