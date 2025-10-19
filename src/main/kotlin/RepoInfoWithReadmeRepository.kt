@@ -1,15 +1,16 @@
 import base.Client
 
 class RepoInfoWithReadmeRepository(private val client: Client) {
-    suspend fun getInfo(): List<GitHubRepo> {
+    suspend fun getInfo(accountName: String): List<GitHubRepo> {
         val result = mutableListOf<GitHubRepo>()
-        val repos = client.fullPagedService.fullListRepos().also {
+        val repos = client.fullPagedService.fullListRepos(accountName).also {
             println("size = ${it.size}")
         }
         repos.forEachIndexed { index, repo ->
             if (!repo.private) {
                 try {
                     val decodedReadme = client.fileService.getRawContent(
+                        accountName = accountName,
                         repoName = repo.name,
                         defaultBranch = repo.default_branch,
                         fileName = "README.md"
