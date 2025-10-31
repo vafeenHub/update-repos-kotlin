@@ -49,10 +49,7 @@ object ConsoleRepoMapProcessor : RepoMapProcessor {
  * По умолчанию запись ведется в файл `README2.md` в корневом каталоге проекта.
  */
 object FileRepoMapProcessor : RepoMapProcessor {
-    private val file = File(
-        "README2.md"
-//        "profile/README.md"
-    )
+    private val file = File("profile/README.md")
 
     init {
         file.createNewFile()
