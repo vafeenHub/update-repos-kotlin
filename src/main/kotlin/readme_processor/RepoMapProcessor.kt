@@ -17,13 +17,14 @@ object ConsoleRepoMapProcessor : RepoMapProcessor {
         print("\n\n")
     }
 
-    override fun clear() {
-
-    }
+    override fun clear() {}
 }
 
 object FileRepoMapProcessor : RepoMapProcessor {
-    private val file = File("profile/README.md")
+    private val file = File(
+        "README2.md"
+//        "profile/README.md"
+    )
 
     init {
         file.createNewFile()

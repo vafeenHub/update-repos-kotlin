@@ -1,8 +1,8 @@
 package readme_processor
 
-import GitHubRepo
+
+import domain.models.GitHubRepo
 import java.io.File
-import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -10,29 +10,32 @@ import java.time.format.DateTimeFormatter
 typealias RepoMap = MutableMap<String, MutableList<GitHubRepo>>
 
 fun repoMapOf(): RepoMap = mutableMapOf()
-class ReadmeProcessor(private val repoMap: RepoMap, private val repoMapProcessor: RepoMapProcessor) {
-    fun process(startOfReadme: String) {
-        println("start create")
-        repoMapProcessor.apply {
-            clear()
-            append(startOfReadme)
+
+fun processReadme(
+    repoMap: RepoMap,
+    repoMapProcessor: RepoMapProcessor,
+    startOfReadme: String
+) {
+    println("start create")
+    repoMapProcessor.apply {
+        clear()
+        append(startOfReadme)
+        newLine()
+        append("# Last update: ${getCurrentMoscowTimeAsString()}")
+        newLine()
+        append("# Repos:")
+        newLine()
+        repoMap.keys.sortedAsSemesters().forEach { key ->
+            append("${if (key != "others") "Semester: " else ""}$key")
             newLine()
-            append("# Last update: ${getCurrentMoscowTimeAsString()}")
-            newLine()
-            append("# Repos:")
-            newLine()
-            repoMap.keys.sortedAsSemesters().forEach { key ->
-                append("${if (key != "others") "Semester: " else ""}$key")
+            repoMap[key]?.forEach { repo ->
+                println(repo)
+                append(repo.getLinkedString())
                 newLine()
-                repoMap[key]?.forEach { repo ->
-                    println(repo)
-                    append(repo.getLinkedString())
-                    newLine()
-                }
             }
         }
-        println("end create")
     }
+    println("end create")
 }
 
 fun MutableMap<String, MutableList<GitHubRepo>>.add(key: String, value: GitHubRepo) {
@@ -50,7 +53,8 @@ fun Set<String>.sortedAsSemesters(): List<String> = this.sortedWith(
         { it } // Сортировка строк по алфавиту
     ))
 
-fun GitHubRepo.getLinkedString(): String = "[${readme?.replaceFirst("#", "")?.trim()}]($html_url)"
+fun GitHubRepo.getLinkedString(): String =
+    "[${readmeLines?.firstOrNull()?.replaceFirst("#", "")?.trim()}]($html_url)"
 
 fun getCurrentMoscowTimeAsString(): String {
     // 1. Получаем текущее время в Москве
