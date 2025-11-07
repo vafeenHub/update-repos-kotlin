@@ -53,12 +53,12 @@ jobs:
           java-package: 'jdk'
           cache: 'gradle'
 
-      - name: Build APK with Version
+      - name: Build JAR with Version
         run: |
           bash ./gradlew jar \
             -PversionName=${{ steps.generate_tag.outputs.RELEASE_TAG }}
 
-      - name: MV jar file to root
+      - name: MV JAR file to root
         run: |
           mv ./build/libs/Update-repos-${{ steps.generate_tag.outputs.RELEASE_TAG }}.jar ./Update-repos-${{ steps.generate_tag.outputs.RELEASE_TAG }}.jar
 
