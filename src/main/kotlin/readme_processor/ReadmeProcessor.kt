@@ -41,7 +41,9 @@ fun processReadme(
         repoMap.keys.sortedAsSemesters().forEach { key ->
             append("${if (key != "others") "Semester: " else ""}$key")
             newLine()
-            repoMap[key]?.forEach { repo ->
+            repoMap[key]?.sortedBy {
+                it.readmeLines?.firstOrNull()
+            }?.forEach { repo ->
                 println("Processing for README: ${repo.name}")
                 append(repo.getLinkedString())
                 newLine()

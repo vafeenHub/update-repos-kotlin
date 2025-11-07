@@ -6,7 +6,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.filter
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.getKoin
-import readme_processor.FileRepoMapProcessor
+import readme_processor.RepoMapProcessor
 import readme_processor.add
 import readme_processor.getContentFromTemplateReadme
 import readme_processor.processReadme
@@ -72,7 +72,7 @@ suspend fun main(args: Array<String>) = coroutineScope {
 
     processReadme(
         repoMap = repoMap,
-        repoMapProcessor = FileRepoMapProcessor,
+        repoMapProcessor = RepoMapProcessor.FILE,
         startOfReadme = getContentFromTemplateReadme(),
     )
     val client = koin.get<Client>()
