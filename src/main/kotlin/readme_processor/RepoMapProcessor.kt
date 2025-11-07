@@ -24,6 +24,11 @@ interface RepoMapProcessor {
      * Очищает целевой вывод, подготавливая его к новой записи.
      */
     fun clear()
+
+    companion object {
+        val CONSOLE = ConsoleRepoMapProcessor
+        val FILE = FileRepoMapProcessor
+    }
 }
 
 /**
