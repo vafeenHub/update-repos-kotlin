@@ -3,9 +3,9 @@
 Программа на Kotlin для автоматического формирования и обновления файла `profile/README.md` в
 профиле GitHub-организации (или пользователя) на основе списка публичных репозиториев.
 
-📥 **Последний релиз**: [Releases](https://github.com/vafeenLab/update-repos-kotlin/releases  )  
+📥 **Последний релиз**: [Releases](https://github.com/vafeenHub/update-repos-kotlin/releases  )  
 ⚙️ **Workflow для автоматического запуска в организации
-**: [update-repos.yml](https://github.com/vafeenLab/.github/blob/main/.github/workflows/update-repos.yml  )
+**: [update-repos.yml](https://github.com/vafeenHub/.github/blob/main/.github/workflows/update-repos.yml  )
 
 ---
 
