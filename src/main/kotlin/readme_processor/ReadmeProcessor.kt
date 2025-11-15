@@ -34,12 +34,20 @@ fun processReadme(
         clear()
         append(startOfReadme)
         newLine()
-        append("# Last update: ${getCurrentMoscowTimeAsString()}")
-        newLine()
-        append("# Repos:")
+        append("[Updated ${getCurrentMoscowTimeAsString()}]")
         newLine()
         repoMap.keys.sortedAsSemesters().forEach { key ->
-            append("${if (key != "others") "Semester: " else ""}$key")
+//            <details>
+//<summary>Semester: 2</summary>
+//
+//- [Информатика и программирование 2 семестр: Курсовая](https://github.com/vafeenHub/computer-science-and-programming_2-semester)
+//- [Пакеты прикладных программ 2 семестр](https://github.com/vafeenHub/application-software-packages_2-semester)
+//
+//</details>
+            append(
+                "<details>\n" +
+                        "<summary>${if (key != "others") "Semester: " else ""}$key</summary>"
+            )
             newLine()
             repoMap[key]?.sortedBy {
                 it.readmeLines?.firstOrNull()
@@ -48,6 +56,7 @@ fun processReadme(
                 append(repo.getLinkedString())
                 newLine()
             }
+            append("</details>")
         }
     }
     println("end README creating")
