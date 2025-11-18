@@ -94,7 +94,7 @@ internal class ReadmeProcessorImpl(
         val moscowTime = ZonedDateTime.now(ZoneId.of("Europe/Moscow"))
 
         // 2. Форматируем в строку (день.месяц.год в часы:минуты:секунды)
-        val formatter = DateTimeFormatter.ofPattern("'*'dd.MM.yyyy'*' 'в' '*'HH:mm:ss'*' 'MSK'")
+        val formatter = DateTimeFormatter.ofPattern("'**'dd.MM.yyyy'**' 'в' '**'HH:mm:ss'**' 'MSK'")
         return moscowTime.format(formatter)
     }
 
