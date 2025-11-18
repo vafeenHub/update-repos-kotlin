@@ -37,6 +37,7 @@ internal class RetrofitReposInfoRepository(private val service: GitHubApiService
             repos.forEach { emit(it) }
             if (repos.isEmpty()) break // Если страница пустая, выходим из цикла
             page++
+            break
         }
     }
 }

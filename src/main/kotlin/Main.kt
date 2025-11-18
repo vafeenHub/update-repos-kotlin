@@ -1,16 +1,15 @@
-import data.service.AppUpdateReposModule
+import data.DataModule
 import data.service.client.base.Client
+import domain.ReadmeProcessor
 import domain.ReposInfoWithReadmeRepository
+import domain.add
 import domain.models.semesters
+import domain.repoMapOf
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.filter
 import org.koin.core.context.startKoin
 import org.koin.java.KoinJavaComponent.getKoin
 import readme_processor.RepoMapProcessor
-import readme_processor.add
-import readme_processor.getContentFromTemplateReadme
-import readme_processor.processReadme
-import readme_processor.repoMapOf
 
 
 /**
@@ -49,7 +48,7 @@ suspend fun main(args: Array<String>) = coroutineScope {
         return@coroutineScope
     }
     startKoin {
-        modules(AppUpdateReposModule)
+        modules(DataModule)
     }
     val koin = getKoin()
     val reposInfoWithReadmeRepository = koin.get<ReposInfoWithReadmeRepository>()
@@ -61,7 +60,6 @@ suspend fun main(args: Array<String>) = coroutineScope {
         filterPredicate = { it.name != ".github" && !it.private })
         .filter { it.readmeLines != null }
         .collect { repo ->
-            println("Processing by semesters: ${repo.name}, README: ${repo.readmeLines?.firstOrNull()}")
             val semesters = repo.semesters
             if (semesters == null) {
                 repoMap.add("others", repo)
@@ -70,11 +68,11 @@ suspend fun main(args: Array<String>) = coroutineScope {
             }
         }
 
-    processReadme(
-        repoMap = repoMap,
-        repoMapProcessor = RepoMapProcessor.FILE,
-        startOfReadme = getContentFromTemplateReadme(),
-    )
+    getKoin().get<ReadmeProcessor>()
+        .processReadme(
+            repoMap = repoMap,
+            repoMapProcessor = RepoMapProcessor.FILE,
+        )
     val client = koin.get<Client>()
     client.closeConnection()
 }

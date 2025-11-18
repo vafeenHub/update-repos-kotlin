@@ -1,11 +1,14 @@
 package data
 
 import domain.FileContentRepository
+import domain.ReadmeGettingResultLogger
 import domain.ReposInfoRepository
 import domain.ReposInfoWithReadmeRepository
 import domain.models.GitHubRepo
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flowOf
 
 /**
  * Реализация [ReposInfoWithReadmeRepository], обогащающая информацию о репозиториях содержимым их README файлов.
@@ -19,8 +22,8 @@ import kotlinx.coroutines.flow.map
 internal class RepoInfoWithReadmeRepositoryImpl(
     private val reposInfoRepository: ReposInfoRepository,
     private val fileContentRepository: FileContentRepository,
+    private val logger: ReadmeGettingResultLogger,
 ) : ReposInfoWithReadmeRepository {
-    private val logIsApplied = false
 
     /**
      * Получает информацию о репозиториях и дополняет её содержимым README файла.
@@ -33,24 +36,24 @@ internal class RepoInfoWithReadmeRepositoryImpl(
      * @param filterPredicate Предикат для фильтрации репозиториев.
      * @return [Flow] с репозиториями [GitHubRepo], дополненными содержимым README.
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun getInfo(
         accountName: String,
         filterPredicate: (GitHubRepo) -> Boolean
-    ): Flow<GitHubRepo> = reposInfoRepository.getAllRepos(accountName, filterPredicate).map {
-        try {
+    ): Flow<GitHubRepo> =
+        reposInfoRepository.getAllRepos(accountName, filterPredicate).flatMapMerge {
+
             val decodedReadme = fileContentRepository.getRawContent(
                 accountName = accountName,
                 repoName = it.name,
                 defaultBranch = it.default_branch,
                 fileName = "README.md"
             )
-            if (logIsApplied) println("Repository Name: ${it.name}, README: $decodedReadme")
-            if (decodedReadme != null) {
+            logger.addRow(it.name, decodedReadme != null)
+            val resultRepository = if (decodedReadme != null) {
                 it.copy(readmeLines = decodedReadme.lines().filter { str -> str.isNotEmpty() })
             } else it
-        } catch (e: Exception) {
-            if (logIsApplied) println("Repository Name: ${it.name}, ${e.stackTraceToString()}")
-            it
+
+            resultRepository.let(::flowOf)
         }
-    }
 }

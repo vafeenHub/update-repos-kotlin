@@ -14,7 +14,6 @@ import domain.FileContentRepository
 internal class RetrofitFileContentRepository(
     private val gitHubRawContentService: GitHubRawContentService
 ) : FileContentRepository {
-    private val logsIaApplied = false
 
     /**
      * Получает сырое текстовое содержимое файла из указанного репозитория.
@@ -44,8 +43,7 @@ internal class RetrofitFileContentRepository(
             // Конвертируем поток в строку
             it.charStream().readText()
         }
-    } catch (e: Exception) {
-        if (logsIaApplied) println("Error ReadmeContent for repository: $repoName ${e.stackTraceToString()}")
+    } catch (_: Exception) {
         null
     }
 }
